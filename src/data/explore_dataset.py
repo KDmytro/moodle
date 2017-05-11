@@ -6,39 +6,35 @@ from dotenv import find_dotenv, load_dotenv
 
 import pandas as pd
 
-# @click.command()
-# @click.argument('input_filepath', type=click.Path(exists=True))
-# @click.argument('output_filepath', type=click.Path())
-def main(input_filepath=None, output_filepath=None):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+class DataExplorer(object):
+
+
+def __init__(self,):
+    pass
 
 def load_all():
-    log_df = pd.read_csv("data/interim/mdl_logstore_standard_log_100000.csv")
+    self.logs_sm = pd.read_csv("data/interim/mdl_logstore_standard_log_100000.csv")
+    self.logs = pd.read_csv("data/raw/mdl_logstore_standard_log.csv")
 
-    badge_df = pd.read_csv("data/raw/mdl_badge_issued.csv")
-    course_modules_df = pd.read_csv("data/raw/mdl_course_modules.csv")
-    completion_df = pd.read_csv("data/raw/mdl_course_modules_completion.csv")
-    grades_history_df = pd.read_csv("data/raw/mdl_grade_grades_history.csv")
-    user_df = pd.read_csv("data/raw/mdl_user.csv")
+    self.badges = pd.read_csv("data/raw/mdl_badge_issued.csv")
+    self.course = pd.read_csv("data/raw/mdl_course_modules.csv")
+    self.completions = pd.read_csv("data/raw/mdl_course_modules_completion.csv")
+    self.grades = pd.read_csv("data/raw/mdl_grade_grades_history.csv")
+    self.users = pd.read_csv("data/raw/mdl_user.csv")
 
-def load_table(module_num=None):
+def load_table(module=None):
     path = "data/raw/"
-    modules = [ '../interim/mdl_logstore_standard_log_100000.csv',
-                'mdl_logstore_standard_log.csv',
-                'mdl_user.csv',
-                'mdl_course_modules.csv',
-                'mdl_course_modules_completion.csv',
-                'mdl_grade_grades_history.csv',
-                'mdl_badge_issued.csv']
+    modules = { 'log_sm':'../interim/mdl_logstore_standard_log_100000.csv',
+                'logs':'mdl_logstore_standard_log.csv',
+                'users':'mdl_user.csv',
+                'course':'mdl_course_modules.csv',
+                'completions':'mdl_course_modules_completion.csv',
+                'grades':'mdl_grade_grades_history.csv',
+                'badges':'mdl_badge_issued.csv' }
 
-    if not module_num:
-        print module_num
+    if not module:
         for i, m in enumerate(modules):
-            print i, ': ',m
+            print "{} : {} : {}".format(i,m,modules[m])
         module_num = int(raw_input("Enter module number to load: "))
 
     return pd.read_csv(path+modules[module_num])
@@ -47,7 +43,7 @@ def load_table(module_num=None):
 
 # Display all componenets with unique user count
 def list_components_user_count():
-    logs_df[['component','id']].groupby('component')\
+    self.logs[['component','id']].groupby('component')\
                                 .agg({'id': pd.Series.nunique})\
                                 .sort_values(by='id', ascending=False)
 #
@@ -94,7 +90,7 @@ def users_admins():
         'report_loglive',
         'booktool_exportimscp']
 
-    logs_df[logs_df['component'].isin(cols)][['component','id','username']].sort_values(by='component')
+    self.logs[logs_df['component'].isin(cols)][['component','id','username']].sort_values(by='component')
 
 # Out[67]:
 #                   component       id                 username
@@ -114,19 +110,25 @@ def users_admins():
 # 74643          report_stats  1446177  user7501243803613790209
 
 
-def get_course_logs():
-    df = load_table(1)
-    condition = ((df.edulevel != 1) &
-                 (df.courseid == 10464))
-    df = df[condition]
-    df['timecreated'] = to_datetime(df['timecreated'])
+def get_course_logs(id=10464):
+    # load 'logs'
+    if not self.logs:
+        self.logs = load_table("logs")
 
-    return df
+    condition = ((self.logs.edulevel != 1) &
+                 (self.logs.courseid == id))
+    self.logs = self.logs[condition]
+    self.logs['timecreated'] = self.to_datetime(self.logs['timecreated'])
+
+    return self.logs
 
 
 def get_users():
 
-    df = load_table(2)
+    # load 'users'
+    if not self.users:
+        self.users = load_table(2)
+
     cols = ['username',
             'emailstop',
             'city',
@@ -145,23 +147,25 @@ def get_users():
             'timecreated',
             'timemodified']
 
-    df = df[cols]
+    self.users = self.users[cols]
 
-    df['firstaccess'] = to_datetime(df.firstaccess)
-    df['lastaccess'] = to_datetime( df.lastaccess)
-    df['lastlogin'] = to_datetime( df.lastlogin)
-    df['currentlogin'] = to_datetime( df.currentlogin)
-    df['timecreated'] = to_datetime( df.timecreated)
-    df['timemodified'] = to_datetime( df.timemodified)
+    # convert dates
+    self.users['firstaccess'] = self.to_datetime(self.users.firstaccess)
+    self.users['lastaccess'] = self.to_datetime(self.users.lastaccess)
+    self.users['lastlogin'] = self.to_datetime(self.users.lastlogin)
+    self.users['currentlogin'] = self.to_datetime(self.users.currentlogin)
+    self.users['timecreated'] = self.to_datetime(self.users.timecreated)
+    self.users['timemodified'] = self.to_datetime(self.users.timemodified)
 
-    return df
+    return self.users
 
 def to_datetime(date_field):
     return pd.to_datetime(date_field,unit='s')
 
-def log_unique_id_count_by_months():
-    logs_df.groupby([logs_df.timecreated.dt.year, logs_df.timecreated.dt.month])\
-        .agg({'id': pd.Series.nunique})
+def log_activity_count_by_months():
+    grouped = self.logs.groupby([self.logs.timecreated.dt.year,
+                                self.logs.timecreated.dt.month])
+    return grouped.agg({'id': pd.Series.nunique})
 #
 #                               id
 # timecreated timecreated
@@ -193,9 +197,10 @@ def log_unique_id_count_by_months():
 # 2017        1               2402
 
 
-def log_unique_user_count_by_months():
-    logs_df.groupby([logs_df.timecreated.dt.year, logs_df.timecreated.dt.month])\
-        .agg({'username': pd.Series.nunique})
+def log_users_count_by_months():
+    grouped = self.logs.groupby([self.logs.timecreated.dt.year,
+                                self.logs.timecreated.dt.month])
+    return grouped.agg({'username': pd.Series.nunique})
 
 # Out[56]:
 #                          username
@@ -258,14 +263,16 @@ def get_user_activity_by_date(df):
 
 
 if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+    # log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    # logging.basicConfig(level=logging.INFO, format=log_fmt)
+    #
+    # # not used in this stub but often useful for finding various files
+    # project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
+    #
+    # # find .env automagically by walking up directories until it's found, then
+    # # load up the .env entries as environment variables
+    # load_dotenv(find_dotenv())
+    #
+    # main()
 
-    # not used in this stub but often useful for finding various files
-    project_dir = os.path.join(os.path.dirname(__file__), os.pardir, os.pardir)
-
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
-
-    main()
+    pass
