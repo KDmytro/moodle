@@ -66,7 +66,7 @@ cv=cv
 
 y_hat = clf_l1_LR.predict(X_test)
 
-print "Scores:
+print "Scores:"
 print classification_report(y_test,y_hat)
 print_coefs(funnel.data.columns,clf_l1_LR.coef_[0])
 print "\n---\n"
@@ -114,10 +114,10 @@ print "\n---\n"
 print "Week 1+2 all model"
 
 funnel.init_data()
-funnel.make_wk1_features()
-funnel.make_wk2_features()
+# funnel.make_wk1_features()
 funnel.make_wk1_features_to_date()
-funnel.make_wk1_features_catchup()
+funnel.make_wk2_features()
+# funnel.make_wk1_features_catchup()
 
 X_train, X_test, y_train, y_test = train_test_split(funnel.data.values, funnel.y.values, test_size=0.25, random_state=123)
 clf_l1_LR.fit(X_train,y_train)

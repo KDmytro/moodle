@@ -70,7 +70,6 @@ class Funnel(object):
         self.make_completion_feature(54989, "wk1_page_c", "2016-08-14", "2016-08-21")
 
 
-
     def make_all_features_by_date(self, end_date, start_date=pd.to_datetime(0)):
         # All scorable course components
         min_req = [54994, 54989, 55005, 55000, 55017, 55014, 55012, 55029, 55023, 55027]
@@ -78,6 +77,13 @@ class Funnel(object):
         for c in min_req:
             self.make_completion_feature(c, str(c), end_date)
 
+    def quizzes_over_time(self):
+        self.make_completion_feature(54994,'wk1_quiz',"2016-08-14")
+        self.make_completion_feature(55005,'wk2_quiz',"2016-08-21")
+        self.make_completion_feature(55017,'wk3_quiz',"2016-08-28")
+        self.make_completion_feature(55029,'wk4_quiz',"2016-09-07")
+
+        
     def make_dict_features_by_date(self, features, end_date, start_date=pd.to_datetime(0)):
         # All scorable course components
         # min_req = [54994, 54989, 55005, 55000, 55017, 55014, 55012, 55029, 55023, 55027]
