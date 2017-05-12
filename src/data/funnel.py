@@ -5,9 +5,16 @@
 # 2. get list of users
 import pandas as pd
 
-class Funnel(object):
+class FeatureFactory(object):
 
-    def __init__(self, logs, completions=None):
+    def __init__(self, logs=None, completions=None):
+
+        if not logs:
+            self.logs = pd.read_csv("data/raw/mdl_logstore_standard_log.csv")
+
+        if not completions:
+            self.completions = pd.read_csv("data/raw/mdl_course_modules_completion.csv")
+
         self.logs = logs
         self.completions = completions
 
@@ -83,7 +90,7 @@ class Funnel(object):
         self.make_completion_feature(55017,'wk3_quiz',"2016-08-28")
         self.make_completion_feature(55029,'wk4_quiz',"2016-09-07")
 
-        
+
     def make_dict_features_by_date(self, features, end_date, start_date=pd.to_datetime(0)):
         # All scorable course components
         # min_req = [54994, 54989, 55005, 55000, 55017, 55014, 55012, 55029, 55023, 55027]
