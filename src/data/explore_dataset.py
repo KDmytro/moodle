@@ -13,6 +13,8 @@ class DataExplorer(object):
         self.grades = None
         self.users = None
 
+        self.default_username = 'user9171082785710931969'
+
     def load_all(self):
         self.logs_sm = pd.read_csv("data/interim/mdl_logstore_standard_log_100000.csv")
         self.logs = pd.read_csv("data/raw/mdl_logstore_standard_log.csv")
@@ -111,18 +113,34 @@ class DataExplorer(object):
     # 74643          report_stats  1446177  user7501243803613790209
 
 
-    def get_course_logs(self,id=10464):
+    def get_logs(self):
         # load 'logs'
-        if not self.logs:
+        if self.logs is None:
             self.logs = self.load_table("logs")
-
-            condition = ((self.logs.edulevel != 1) &
-                         (self.logs.courseid == id))
-            self.logs = self.logs[condition]
             self.logs['timecreated'] = self.to_datetime(self.logs['timecreated'])
 
         return self.logs
 
+    def get_course_logs(self,id=10464):
+        # load 'logs'
+        if self.logs is None:
+            self.get_logs()
+
+        condition = ((self.logs.edulevel != 1) &
+                     (self.logs.courseid == id))
+
+        return self.logs[condition]
+
+    def get_user_logs(self,username=None):
+        if self.logs is None:
+            self.get_logs()
+
+        if username is None:
+            username = self.default_username
+
+        return self.logs[self.logs.username == username]
+
+        # user_log =course_logs[course_logs.username == 'user6913591088091496449']
 
     def get_completions(self):
         # load 'logs'
@@ -255,12 +273,6 @@ class DataExplorer(object):
     # 'CONTEXT_BLOCK', 80
     #
 
-
-
-
-    def logs_get_user(username):
-        return logs_df[logs_df.username == username]
-        user_log =course_logs[course_logs.username == 'user6913591088091496449']
 
     def get_activity_counts(username):
         condition = ((aug.edulevel == 2) &
