@@ -152,6 +152,22 @@ class FeatureFactory(object):
 
         return self.y
 
+    def make_y_nextweek(self,date):
+        if not min_req:
+            min_req = [54994, 54989, 55005, 55000, 55017, 55014, 55012, 55029, 55023, 55027]
+
+
+        condition = self.completions.coursemoduleid.isin(wk_req)
+        y_completions = self.completions[condition]
+        y_completions = y_completions.groupby('username')\
+                        .agg({'completionstate':complete})
+
+
+        self.y = self.data.join(y_completions)['completionstate']
+        self.y.fillna(False, inplace=True)
+
+        return self.y
+
 
 if __name__ == "__main__":
     pass
