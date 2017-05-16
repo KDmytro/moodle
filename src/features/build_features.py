@@ -51,7 +51,7 @@ class FeatureFactory(object):
             55052:'4_page_4',
         }
 
-        
+
     def init_data(self):
         #  init funnel df with all unique users form the log as index
         self.data = pd.DataFrame(index=self.logs.username.unique())
@@ -64,6 +64,11 @@ class FeatureFactory(object):
     #     feature.name = feature_name
     #     self.data = self.data.join(feature)
     #     self.data.fillna(0,inplace=True)
+
+
+    def init_registered_by(self,date):
+        user_index = self.logs[self.logs.timecreated <= date].username.unique()
+        self.data = pd.DataFrame(index=user_index)
 
     def make_completion_feature(self, id, feature_name, end_date, start_date=pd.to_datetime(0)):
         condition = ((self.logs.contextinstanceid == id) &

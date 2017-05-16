@@ -42,9 +42,43 @@ class ModelFactory(object):
             y_train, y_test = y[train_index], y[test_index]
 
         # y_hat = cross_val_predict(clf_LR, X_train, y_train, cv=10)
-        self.wk1_model = self.clf_LRCV.fit(X_train,y_train)
+        self.wk1_model = self.clf_LR.fit(X_train,y_train)
 
         return self.wk1_model
+
+    def fit_model(by_date='2016-08-14'):
+
+        # Init new feature matrix
+        FF.init_registered_by(by_date)
+        FF.make_dict_features_by_date(FF.features,by_date)
+
+        FF.make_y()
+
+        X = FF.data.values
+        y = FF.y.values
+
+        # Train/Test split
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=.25,
+                                                             random_state=123)
+
+        # GridSearch for best params on LR
+        param_grid = {
+                        'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000],
+                        'penalty': ['l1','l2'],
+                        'class_weight': ['balanced', None]
+                     }
+
+
+        clf = GridSearchCV(LogisticRegression(), param_grid, scoring='roc_auc',cv=5)
+        clf.fit(X_train,y_train)
+        # clf.cv_results_
+        print clf.best_params_
+
+        y_predict = clf.best_estimator_.predict(X_test)
+        print classification_report(y_test,y_predict)
+        print_coefs(FF.data.columns,clf.best_estimator_.coef_[0])
+
+
 
     def fit_wk2_model(self,X,y):
 
@@ -81,7 +115,7 @@ class ModelFactory(object):
 
 
     def print_scores(self,model):
-        self.models[model]
+        model
         print "Scores:"
         print classification_report(y_test,y_hat)
         print_coefs(funnel.data.columns,clf_LR.coef_[0])
@@ -97,13 +131,12 @@ if __name__ == "__main__":
 
     FF = FeatureFactory(logs,completions)
     features = FF.features
-    FF.make_y()
 
     MF = ModelFactory()
 
 
     # Week 1 model
-    FF.init_data()
+    FF.init_registered_by("2016-08-14")
     FF.make_dict_features_by_date(features,'2016-08-14')
     X = FF.data.values
     y = FF.y.values
