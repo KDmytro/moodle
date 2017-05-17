@@ -155,8 +155,16 @@ class DataExplorer(object):
     def get_users(self):
 
         # load 'users'
-        if not self.users:
-            self.users = load_table(2)
+        if self.users is None:
+            self.users = self.load_table("users")
+            self.users['timecreated'] = self.to_datetime(self.logs['timecreated'])
+
+        self.users.ix[self.users.timezone == '99','timezone'] = 'UTC'
+        self.users.ix[self.users.timezone == '-3.0','timezone'] = 'America/Sao_Paulo'
+        self.users.ix[self.users.timezone == '-5.0','timezone'] = 'America/New_York'
+        self.users.ix[self.users.timezone == '1.0','timezone'] = 'Europe/London'
+        self.users.ix[self.users.timezone == '2.0','timezone'] = 'Europe/Paris'
+        self.users.ix[self.users.timezone == '5.5','timezone'] = 'Asia/Kolkata'
 
         cols = ['username',
                 'emailstop',
