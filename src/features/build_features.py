@@ -80,6 +80,58 @@ class FeatureFactory(object):
         self.data = self.data.join(feature)
         self.data.fillna(0,inplace=True)
 
+    def make_action_count_feature(self, action, feature_name, end_date, start_date=pd.to_datetime(0)):
+
+        condition = ((self.logs.action == action) &
+                    (self.logs.timecreated > start_date) &
+                    (self.logs.timecreated <= end_date))
+
+        feature = self.logs[condition].groupby('username').size()
+        feature.name = feature_name
+        self.data = self.data.join(feature)
+        self.data.fillna(0,inplace=True)
+
+    def make_event_count_feature(self, eventname, feature_name, end_date, start_date=pd.to_datetime(0)):
+
+        condition = ((self.logs.eventname == eventname) &
+                    (self.logs.timecreated > start_date) &
+                    (self.logs.timecreated <= end_date))
+
+        feature = self.logs[condition].groupby('username').size()
+        feature.name = feature_name
+        self.data = self.data.join(feature)
+        self.data.fillna(0,inplace=True)
+
+    def make_action_freq(self, action, feature_name, end_date, start_date=pd.to_datetime(0)):
+
+        condition = ((self.logs.action == action) &
+                    (self.logs.timecreated > start_date) &
+                    (self.logs.timecreated <= end_date))
+
+        feature = self.logs[condition]\
+                        .groupby(['username',self.logs.timecreated.dt.date])\
+                        .agg({'action':lambda x:1})\
+                        .unstack(-1)\
+                        .sum(axis=1)
+
+        feature.name = feature_name
+        self.data = self.data.join(feature)
+        self.data.fillna(0,inplace=True)
+
+    def make_time_since(self, action, feature_name, end_date, start_date=pd.to_datetime(0)):
+
+        condition = ((self.logs.action == action) &
+                    (self.logs.timecreated > start_date) &
+                    (self.logs.timecreated <= end_date))
+
+        feature = self.logs[condition]\
+                        .groupby(['username'])\
+                        .apply(lambda x: (pd.to_datetime("2016-08-14") - x.timecreated.max()).days)
+
+        feature.name = feature_name
+        self.data = self.data.join(feature)
+        self.data.fillna(0,inplace=True)
+
     def make_total_event_counts(self, feature_name, date):
         condition = ((self.logs.timecreated <= date))
         feature = self.logs[condition].groupby('username').size()
@@ -147,9 +199,9 @@ class FeatureFactory(object):
                         .agg({'completionstate':complete})
 
 
-        self.y = self.data.join(y_completions)['completionstate']
+        self.y = self.data.join(y_completions)['completionstate'].copy()
         self.y.fillna(False, inplace=True)
-
+        self.y.index.rename('username',inplace=True)
         return self.y
 
     def make_y_nextweek(self,date):

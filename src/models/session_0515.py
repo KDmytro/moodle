@@ -1,12 +1,14 @@
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.feature_selection import RFECV
-from sklearn.feature_selection import SelectPercentile, f_classif
-from sklearn.feature_selection import chi2
+from sklearn.feature_selection import SelectPercentile, f_classif, chi2
 
 from sklearn.metrics import f1_score, make_scorer
 
 import operator
+import numpy as np
+import matplotlib.pyplot as plt
+plt.ion()
 
 
 run src/init_script.py
@@ -177,7 +179,7 @@ FF.make_y()
 X = FF.data.values
 y = FF.y.values
 
-# selector = SelectPercentile(chi2, percentile=10)
+# selector = SelectPercentile(chi2, percentile=25)
 # selector.fit(X,y)
 # selector.scores_
 # selector.pvalues_

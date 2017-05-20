@@ -7,10 +7,12 @@ from sklearn.feature_selection import SelectPercentile, f_classif, chi2
 from sklearn.model_selection import train_test_split, StratifiedShuffleSplit, cross_val_predict
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report, roc_curve, auc
-
+from sklearn.dummy import DummyClassifier
 
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
 
 import operator
 import numpy as np
@@ -88,6 +90,9 @@ class ModelFactory(object):
         y_predict = clf.best_estimator_.predict(X_test)
 
         print classification_report(y_test,y_predict)
+        self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test))
+        return clf.best_estimator_
+
         self.print_coefs(FF.data.columns[selector.get_support()],
                             clf.best_estimator_.coef_[0],
                             # np.nan_to_num(selector.scores_),
@@ -103,7 +108,77 @@ class ModelFactory(object):
         # print classification_report(y_test,y_predict)
         # self.print_coefs(FF.data.columns[selector.get_support()],clf.best_estimator_.coef_[0],selector.pvalues_)
 
+
+    def fit_tree_model(self,X,y,by_date='2016-08-14'):
+
+        # Train test split using StratifiedShuffleSplit
+        for train_index, test_index in self.cv.split(X, y):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+        # GridSearch for best params on LR
+        param_grid = {
+                        'max_depth': np.arange(3, 10),
+                        'max_leaf_nodes' : [None, 3,4,5,10,15,20],
+                        'class_weight': ['balanced']
+                     }
+
+
+        clf = GridSearchCV(DecisionTreeClassifier(), param_grid, scoring='roc_auc',cv=5)
+        clf.fit(X_train,y_train)
+        # best params
+        print clf.best_params_
+
+        # Calculate and print accuracy scores
+        y_predict = clf.best_estimator_.predict(X_test)
+
+
+        # Print Scores and plot ROC curve
+        print classification_report(y_test,y_predict)
         self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test))
+
+    def fit_dummy(self,X,y):
+        # Train test split using StratifiedShuffleSplit
+        for train_index, test_index in self.cv.split(X, y):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+        clf = DummyClassifier(strategy='stratified',random_state=123)
+        clf.fit(X_train,y_train)
+
+        # Calculate and print accuracy scores
+        y_predict = clf.predict(X_test)
+
+        # Print Scores and plot ROC curve
+        print classification_report(y_test,y_predict)
+        self.plot_roc(y_test, clf.predict_proba(X_test))
+
+    def fit_SVC(self,X,y):
+
+        # Train test split using StratifiedShuffleSplit
+        for train_index, test_index in self.cv.split(X, y):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+        # GridSearch for best params on LR
+        param_grid = {
+                        'C': [0.001, 0.1],
+                        'kernel': ['rbf','poly'],
+                        'class_weight': ['balanced']
+                     }
+
+
+        clf = GridSearchCV(SVC(probability=True), param_grid, scoring='roc_auc',cv=5)
+        clf.fit(X_train,y_train)
+        # best params
+        print clf.best_params_
+
+        # Calculate and print accuracy scores
+        y_predict = clf.best_estimator_.predict(X_test)
+
+        print classification_report(y_test,y_predict)
+        self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test))
+        return clf.best_estimator_
 
     def print_scores(self,model):
         model
@@ -111,12 +186,6 @@ class ModelFactory(object):
         print classification_report(y_test,y_hat)
         print_coefs(funnel.data.columns,clf_LR.coef_[0])
         print "\n---\n"
-
-    # def print_coefs(self,labels,coefs,scores,pvals):
-    #     print "Coefficients:"
-    #     # for c in sorted(zip(labels,coefs,pvals), key = lambda t: -abs(t[1])):
-    #     for c in sorted(zip(labels,coefs,scores,pvals), key = lambda t: -abs(t[2])):
-    #         print "{} : {}, {}, {}".format(c[0],c[1],c[2],c[3])
 
     def print_coefs(self,labels,coefs,pvals):
         print "Coefficients:"
@@ -140,18 +209,21 @@ class ModelFactory(object):
         plt.legend(loc="lower right")
         plt.show()
 
-if __name__ == "__main__":
+def run_wk1():
+    # Week 1 model
+    print "\n\nWeek1 Model results:"
 
-    DE = DataExplorer()
-    logs = DE.get_course_logs()
-    completions = DE.get_completions()
+    cutoff = "2016-08-14"
+    FF.init_registered_by(cutoff)
+    FF.make_dict_features_by_date(features,cutoff)
+    FF.make_action_count_feature("loggedin", "n_logins", start_date="2016-08-07", end_date=cutoff)
+    FF.make_y()
+    X = FF.data.values
+    y = FF.y.values
 
-    FF = FeatureFactory(logs,completions)
-    features = FF.features
+    wk1_model = MF.fit_model(X,y)
 
-    MF = ModelFactory()
-
-
+def run_all():
     # Week 1 model
     print "\n\nWeek1 Model results:"
 
@@ -199,3 +271,14 @@ if __name__ == "__main__":
     y = FF.y.values
 
     wk4_model = MF.fit_model(X,y)
+
+if __name__ == "__main__":
+
+    DE = DataExplorer()
+    logs = DE.get_logs()
+    completions = DE.get_completions()
+
+    FF = FeatureFactory(logs,completions)
+    features = FF.features
+
+    MF = ModelFactory()

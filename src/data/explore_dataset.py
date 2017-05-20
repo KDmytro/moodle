@@ -114,12 +114,24 @@ class DataExplorer(object):
 
 
     def get_logs(self):
+        bad_hombres = [
+        'user7959886181284446209',
+        'user113100542036672513',
+        'user7619359643386511361',
+        'user1671143131736702977'
+        ]
         # load 'logs'
         if self.logs is None:
             self.logs = self.load_table("logs")
             self.logs['timecreated'] = self.to_datetime(self.logs['timecreated'])
+            condition = ((self.logs.edulevel != 1) &
+                         (self.logs.username != 'user8540069828419911681') &
+                         (self.logs.username != 'user6442803380426375169') &
+                         ~(self.logs.username.isin(bad_hombres) ))
+            self.logs = self.logs[condition]
 
         return self.logs
+
 
     def get_course_logs(self,id=10464):
         # load 'logs'
@@ -130,6 +142,17 @@ class DataExplorer(object):
                      (self.logs.courseid == id))
 
         return self.logs[condition]
+
+    def get_wk1_logs(self,id=10464):
+        if self.logs is None:
+            self.get_logs()
+
+        condition = ((self.logs.timecreated <= "2016-08-14") &
+                     (self.logs.timecreated > "2016-08-07") &
+                     (self.logs.courseid == id))
+
+        return self.logs[condition]
+
 
     def get_user_logs(self,username=None):
         if self.logs is None:
