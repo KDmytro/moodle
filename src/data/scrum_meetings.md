@@ -69,3 +69,24 @@ Questions for Derren
   * Number of attempts
   * Revisitng
 * Log features?
+
+
+
+Best model - Logistic w scaled features:
+  '''python
+  In [356]: MF.fit_model(scale(FF.data.values),y)
+  {'penalty': 'l1', 'C': 1, 'class_weight': 'balanced'}
+               precision    recall  f1-score   support
+
+        False       0.96      0.79      0.87       380
+         True       0.34      0.79      0.48        53
+
+  avg / total       0.89      0.79      0.82       433
+
+  Out[356]:
+  LogisticRegression(C=1, class_weight='balanced', dual=False,
+            fit_intercept=True, intercept_scaling=1, max_iter=100,
+            multi_class='ovr', n_jobs=1, penalty='l1', random_state=None,
+            solver='liblinear', tol=0.0001, verbose=0, warm_start=False)
+
+  '''

@@ -139,21 +139,37 @@ class FeatureFactory(object):
         self.data = self.data.join(feature)
         self.data.fillna(0,inplace=True)
 
-    def make_wk1_features(self):
+    def make_wk0_features(self,cutoff='2016-08-14'):
+
+        # week 0
+        self.make_completion_feature(54984, '0_forum', cutoff)
+        self.make_completion_feature(54985, '0_page_1', cutoff)
+        self.make_completion_feature(54986, '0_page_2', cutoff)
+        self.make_completion_feature(55043, '0_page_3', cutoff)
+        # self.make_total_event_counts("wk1_total", "2016-08-14")
+
+    def make_wk1_features(self,cutoff='2016-08-14'):
 
         # week 1
-        self.make_completion_feature(54994, "wk1_quiz", "2016-08-14")
-        self.make_completion_feature(54989, "wk1_page", "2016-08-14")
-        self.make_total_event_counts("wk1_total", "2016-08-14")
+        self.make_completion_feature(54988, '1_forum', cutoff)
+        self.make_completion_feature(54990, '1_book_1', cutoff)
+        self.make_completion_feature(54991, '1_book_2', cutoff)
+        self.make_completion_feature(54994, '1_quiz', cutoff)
+        self.make_completion_feature(54995, '1_feedback', cutoff)
+        self.make_completion_feature(54992, '1_choice', cutoff)
+        self.make_completion_feature(54993, '1_page_2', cutoff)
+        self.make_completion_feature(54989, '1_page_1', cutoff)
 
-    def make_wk2_features(self):
+    def make_wk2_features(self,cutoff='2016-08-21'):
 
         # week 2 features
-        self.make_completion_feature(55000, "wk2_page", "2016-08-21")
-        self.make_completion_feature(55001, "wk2_book", "2016-08-21")
-        self.make_completion_feature(55005, "wk2_quiz", "2016-08-21")
+        self.make_completion_feature(55005, '2_quiz', cutoff)
+        self.make_completion_feature(55001, '2_book', cutoff)
+        self.make_completion_feature(55002, '2_glossary', cutoff)
+        self.make_completion_feature(55004, '2_survey', cutoff)
+        self.make_completion_feature(55003, '2_wiki', cutoff)
+        self.make_completion_feature(55000, '2_page_1', cutoff)
 
-        self.make_total_event_counts("wk2_total", "2016-08-21")
 
     def make_wk1_features_to_date(self):
         # week 1 combined
@@ -204,18 +220,70 @@ class FeatureFactory(object):
         self.y.index.rename('username',inplace=True)
         return self.y
 
-    def make_y_nextweek(self,date):
-        if not min_req:
-            min_req = [54994, 54989, 55005, 55000, 55017, 55014, 55012, 55029, 55023, 55027]
+    def make_y_wk2(self):
 
+        wk_req = {  55005:'2_quiz',
+                    55001:'2_book',
+                    # 55002:'2_glossary',
+                    # 55004:'2_survey',
+                    # 55003:'2_wiki',
+                    55000:'2_page_1'}
 
-        condition = self.completions.coursemoduleid.isin(wk_req)
+        condition = (self.completions.coursemoduleid.isin(wk_req) &
+                    (self.completions.timemodified <= "2016-08-21") &
+                    (self.completions.timemodified > "2016-08-14"))
+
         y_completions = self.completions[condition]
         y_completions = y_completions.groupby('username')\
-                        .agg({'completionstate':complete})
+                .agg({'completionstate': lambda x: x.sum() == len(wk_req)})
 
+        self.y = self.data.join(y_completions)['completionstate'].copy()
+        self.y.fillna(False, inplace=True)
 
-        self.y = self.data.join(y_completions)['completionstate']
+        return self.y
+
+    def make_y_wk3(self):
+
+        wk_req = {  55017:'3_quiz',
+                    55013:'3_book',
+                    55016:'3_forum',
+                    55014:'3_data',
+                    55012:'3_page_1',
+                    55015:'3_page_2'}
+
+        condition = (self.completions.coursemoduleid.isin(wk_req) &
+                    (self.completions.timemodified <= "2016-08-28") &
+                    (self.completions.timemodified > "2016-08-21"))
+
+        y_completions = self.completions[condition]
+        y_completions = y_completions.groupby('username')\
+                .agg({'completionstate': lambda x: x.sum() == len(wk_req)})
+
+        self.y = self.data.join(y_completions)['completionstate'].copy()
+        self.y.fillna(False, inplace=True)
+
+        return self.y
+
+    def make_y_wk4(self):
+
+        wk_req = {  55051:'4_feedback',
+                    55025:'4_lesson',
+                    55029:'4_quiz',
+                    55027:'4_workshop',
+                    55024:'4_forum',
+                    55030:'4_page_3',
+                    55023:'4_page_1',
+                    55052:'4_page_4'}
+
+        condition = (self.completions.coursemoduleid.isin(wk_req) &
+                    (self.completions.timemodified <= "2016-09-04") &
+                    (self.completions.timemodified > "2016-08-28"))
+
+        y_completions = self.completions[condition]
+        y_completions = y_completions.groupby('username')\
+                .agg({'completionstate': lambda x: x.sum() == len(wk_req)})
+
+        self.y = self.data.join(y_completions)['completionstate'].copy()
         self.y.fillna(False, inplace=True)
 
         return self.y

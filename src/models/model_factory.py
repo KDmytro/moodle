@@ -9,10 +9,12 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report, roc_curve, auc
 from sklearn.dummy import DummyClassifier
 
-from sklearn.linear_model import LogisticRegression, LogisticRegressionCV
+from sklearn.linear_model import LogisticRegression, LogisticRegressionCV, SGDClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+
+import statsmodels.api as sm
 
 import operator
 import numpy as np
@@ -58,14 +60,14 @@ class ModelFactory(object):
             y_train, y_test = y[train_index], y[test_index]
 
         # Feature Selection
-        selector = SelectPercentile(chi2, percentile=100)
-
-        selector.fit(X_train, y_train)
-        # X_train = selector.transform(X_train)
-        # X_test = selector.transform(X_test)
-
-        selector.scores_
-        selector.pvalues_
+        # selector = SelectPercentile(chi2, percentile=100)
+        #
+        # selector.fit(X_train, y_train)
+        # # X_train = selector.transform(X_train)
+        # # X_test = selector.transform(X_test)
+        #
+        # selector.scores_
+        # selector.pvalues_
 
         # feat_pvals = dict(zip(FF.data.columns, np.nan_to_num(selector.pvalues_)))
         # sorted(feat_pvals.items(), key=operator.itemgetter(1),reverse=True)
@@ -93,10 +95,10 @@ class ModelFactory(object):
         self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test))
         return clf.best_estimator_
 
-        self.print_coefs(FF.data.columns[selector.get_support()],
-                            clf.best_estimator_.coef_[0],
-                            # np.nan_to_num(selector.scores_),
-                            np.nan_to_num(selector.pvalues_))
+        # self.print_coefs(FF.data.columns[selector.get_support()],
+        #                     clf.best_estimator_.coef_[0],
+        #                     # np.nan_to_num(selector.scores_),
+        #                     np.nan_to_num(selector.pvalues_))
 
 
         # clf = GridSearchCV(LogisticRegression(), param_grid, scoring='roc_auc', cv=5)
@@ -136,6 +138,7 @@ class ModelFactory(object):
         # Print Scores and plot ROC curve
         print classification_report(y_test,y_predict)
         self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test))
+        return clf.best_estimator_
 
     def fit_dummy(self,X,y):
         # Train test split using StratifiedShuffleSplit
@@ -163,7 +166,7 @@ class ModelFactory(object):
         # GridSearch for best params on LR
         param_grid = {
                         'C': [0.001, 0.1],
-                        'kernel': ['rbf','poly'],
+                        'kernel': ['rbf'],
                         'class_weight': ['balanced']
                      }
 
@@ -179,6 +182,31 @@ class ModelFactory(object):
         print classification_report(y_test,y_predict)
         self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test))
         return clf.best_estimator_
+
+    def fit_SGD(self,X,y):
+
+        # Train test split using StratifiedShuffleSplit
+        for train_index, test_index in self.cv.split(X, y):
+            X_train, X_test = X[train_index], X[test_index]
+            y_train, y_test = y[train_index], y[test_index]
+
+        # GridSearch for best params on LR
+        param_grid = {
+                        'C': [0.001, 0.1],
+                        'kernel': ['rbf'],
+                        'class_weight': ['balanced']
+                     }
+
+
+        # clf = GridSearchCV(SGDClassifier(), param_grid, scoring='roc_auc',cv=5)
+        clf = SGDClassifier(loss='log').fit(X_train,y_train)
+
+        # Calculate and print accuracy scores
+        y_predict = clf.predict(X_test)
+
+        print classification_report(y_test,y_predict)
+        self.plot_roc(y_test, clf.predict_proba(X_test))
+        return clf
 
     def print_scores(self,model):
         model
