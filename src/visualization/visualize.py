@@ -4,8 +4,11 @@ import plotly.figure_factory as ff
 from plotly import graph_objs as go
 
 # chart stages data
-registered = [1314,1765,1981,2100]
-values = [1445, 1246, 1188, 1010, 460]
+registered = [1314, 1799, 1997, 2130, 2162]
+completed_quiz = [0, 587, 380, 403, 550]
+completed_all = [0, 206, 266, 287, 474]
+
+
 phases = ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5']
 
 # color of each funnel section

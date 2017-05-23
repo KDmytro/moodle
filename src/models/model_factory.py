@@ -37,7 +37,13 @@ class ModelFactory(object):
                                             cv=10)
         self.clf_RF = RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1)
 
-
+        self.f, self.ax = plt.subplots()
+        self.ax.set_xlim([0.0, 1.0])
+        self.ax.set_ylim([0.0, 1.05])
+        self.ax.set_xlabel('False Positive Rate')
+        self.ax.set_ylabel('True Positive Rate')
+        self.ax.set_title('ROC Curves')
+        self.ax.legend(loc="lower right")
 
 
 
@@ -92,7 +98,7 @@ class ModelFactory(object):
         y_predict = clf.best_estimator_.predict(X_test)
 
         print classification_report(y_test,y_predict)
-        self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test))
+        self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test), "LR")
         return clf.best_estimator_
 
         # self.print_coefs(FF.data.columns[selector.get_support()],
@@ -137,7 +143,7 @@ class ModelFactory(object):
 
         # Print Scores and plot ROC curve
         print classification_report(y_test,y_predict)
-        self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test))
+        self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test), "DTree")
         return clf.best_estimator_
 
     def fit_dummy(self,X,y):
@@ -180,7 +186,7 @@ class ModelFactory(object):
         y_predict = clf.best_estimator_.predict(X_test)
 
         print classification_report(y_test,y_predict)
-        self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test))
+        self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test), "SVC")
         return clf.best_estimator_
 
     def fit_SGD(self,X,y):
@@ -222,20 +228,14 @@ class ModelFactory(object):
             print "{} : {}, {}".format(c[0],c[1],c[2])
 
 
-    def plot_roc(self,y,y_probas):
+    def plot_roc(self,y,y_probas,label=""):
 
         # Compute ROC curve and area the curve
         fpr, tpr, thresholds = roc_curve(y, y_probas[:, 1])
         roc_auc = auc(fpr, tpr)
-        plt.plot(fpr, tpr, label='ROC (area = %0.2f)' % (roc_auc))
-
-        plt.xlim([0.0, 1.0])
-        plt.ylim([0.0, 1.05])
-        plt.xlabel('False Positive Rate')
-        plt.ylabel('True Positive Rate')
-        plt.title('ROC Curve for logistic regression')
-        plt.legend(loc="lower right")
-        plt.show()
+        self.ax.plot(fpr, tpr, label='%s ROC (area = %0.2f)' % (label, roc_auc))
+        self.ax.legend(loc="lower right")
+        # plt.show()
 
 def run_wk1():
     # Week 1 model

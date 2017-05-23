@@ -220,13 +220,52 @@ class FeatureFactory(object):
         self.y.index.rename('username',inplace=True)
         return self.y
 
+    def make_y_badge(self):
+        eventname = '\\core\\event\\badge_awarded'
+        condition = ((self.logs.eventname == eventname) &
+                    (self.logs.courseid == 10464))
+
+        feature = self.logs[condition]\
+                        .groupby(['username'])\
+                        .agg({'id':lambda x:True})
+
+        feature.columns = ['completionstate']
+        self.y = self.data.join(feature)['completionstate'].copy()
+        self.y.fillna(False, inplace=True)
+        self.y.index.rename('username',inplace=True)
+        return self.y
+
+    def make_y_wk1(self):
+
+        wk_req = {  54988:'1_forum',
+                    54990:'1_book_1',
+                    54991:'1_book_2',
+                    54994:'1_quiz',
+                    54995:'1_feedback',
+                    54992:'1_choice',
+                    54993:'1_page_2',
+                    54989:'1_page_1',}
+
+        condition = (self.completions.coursemoduleid.isin(wk_req) &
+                    (self.completions.timemodified <= "2016-08-14") &
+                    (self.completions.timemodified > "2016-08-07"))
+
+        y_completions = self.completions[condition]
+        y_completions = y_completions.groupby('username')\
+                .agg({'completionstate': lambda x: x.sum() == len(wk_req)})
+
+        self.y = self.data.join(y_completions)['completionstate'].copy()
+        self.y.fillna(False, inplace=True)
+
+        return self.y
+
     def make_y_wk2(self):
 
         wk_req = {  55005:'2_quiz',
                     55001:'2_book',
-                    # 55002:'2_glossary',
-                    # 55004:'2_survey',
-                    # 55003:'2_wiki',
+                    55002:'2_glossary',
+                    55004:'2_survey',
+                    55003:'2_wiki',
                     55000:'2_page_1'}
 
         condition = (self.completions.coursemoduleid.isin(wk_req) &

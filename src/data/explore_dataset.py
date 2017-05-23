@@ -124,7 +124,7 @@ class DataExplorer(object):
         if self.logs is None:
             self.logs = self.load_table("logs")
             self.logs['timecreated'] = self.to_datetime(self.logs['timecreated'])
-            condition = ((self.logs.edulevel != 1) &
+            condition = (#(self.logs.edulevel != 1) &
                          (self.logs.username != 'user8540069828419911681') &
                          (self.logs.username != 'user6442803380426375169') &
                          ~(self.logs.username.isin(bad_hombres) ))
