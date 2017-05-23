@@ -4,13 +4,20 @@ Moodle Dataset
 This project was developed as a capstone project for Galvanize's Data Science Immersive course.
 
 ## Background
+![User Activity](/reports/figures/user_activity.png)
 
 ## Cickstream Data analysis
 
 ## Model
+![Model Accuracy over Time](/reports/figures/model_score.png)
 
 ## Future work
+1. Generalize model to be applied to any course
+2. Provide detailed information about user drop out risk. Use Decision tree algorithm
+3. Develop PHP plug-in for Moodle
 
+## Questions:
+Feel free to reach out to me at __kdmytro@gmail.com__
 
 Project Organization
 ------------
