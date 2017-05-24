@@ -4,9 +4,15 @@ Moodle Dataset
 This project was developed as a capstone project for Galvanize's Data Science Immersive course.
 
 ## Background
-![User Activity](/reports/figures/user_activity.png)
+One of the main issues related to online learning, particularly in MOOCs (massive open online courses), is related to high dropout rate among students. Despite the fact that this topic has been covered extensively in the news and literature, many practitioners and actual instructors still do not have a understanding of the issue. Surprising there are very few tools currently available to facilitators that provide insight into the issue that go beyond basic descriptive analytics. In this project I want to conduct an analysis of the student log data from a sample MOOC and build a predictive model that can help instructors identify student at risk of drop out as early as one week into the course.
+
+## Dataset
+The source of this data is the August 2016 session of the “Teaching with Moodle” MOOC,
+hosted at https://learn.moodle.net/ . Sessions of this course are delivered twice per year by
+employees of Moodle PTY LTD. This session was delivered in a fully online format from August 7 to September 4, 2016. There were 6119 students enrolled in this course, and 2 facilitators. Only data from students agreeing to allow their data to be used in research was included in this data set (2167 student).
 
 ## Cickstream Data analysis
+![User Activity](/reports/figures/user_activity.png)
 
 ## Model
 ![Model Accuracy over Time](/reports/figures/model_score.png)

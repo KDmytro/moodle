@@ -126,7 +126,7 @@ class FeatureFactory(object):
 
         feature = self.logs[condition]\
                         .groupby(['username'])\
-                        .apply(lambda x: (pd.to_datetime("2016-08-14") - x.timecreated.max()).days)
+                        .apply(lambda x: (pd.to_datetime(end_date) - x.timecreated.max()).days)
 
         feature.name = feature_name
         self.data = self.data.join(feature)

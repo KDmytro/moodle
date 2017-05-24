@@ -84,6 +84,7 @@ print FF.data['4_quiz'].count()
  u'seaborn',
  u'seaborn-dark-palette']
 
+# User Activity
 plt.style.use('seaborn-dark-palette')
 x = [0,1,2,3,4]
 registered = [1314, 1799, 1997, 2130, 2162]
@@ -102,7 +103,7 @@ frame = legend.get_frame()
 frame.set_facecolor('0.90')
 
 
-
+# Model Accuracy overtime
 plt.style.use(u'seaborn-darkgrid')
 x = [0,1,2,3]
 recall = [0.78, 0.85, 0.86, 0.89]
@@ -120,3 +121,11 @@ legend = plt.legend(loc='upper left', shadow=True)
 # frame = legend.get_frame()
 # frame.set_facecolor('0.90')
 model_score.png
+
+# Standar Log
+plt.style.use(u'seaborn-darkgrid')
+plt.title("Standard Log - Counts", fontsize=20)
+plt.legend(loc='best', shadow=True)
+plt.plot(logs.groupby(logs.timecreated.dt.date).size())
+
+standard_log.png
