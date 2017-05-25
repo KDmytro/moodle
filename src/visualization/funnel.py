@@ -88,14 +88,14 @@ print FF.data['4_quiz'].count()
 plt.style.use('seaborn-dark-palette')
 x = [0,1,2,3,4]
 registered = [1314, 1799, 1997, 2130, 2162]
-completed_quiz = [0, 587, 380, 403, 550]
+viewed = [1317, 1355, 1118, 1077, 859]
 completed_all = [0, 206, 266, 287, 474]
 x_labels = ["2016-08-07", "2016-08-14", "2016-08-21", '2016-08-28',"2016-09-04"]
 
 plt.title("User Activity", fontsize=20)
 plt.fill_between(x, 0, registered, alpha=0.30)
 plt.plot(x,registered,label = 'Registered')
-plt.plot(x,completed_quiz, label = 'Active')
+plt.plot(x,viewed, label = 'Active')
 plt.plot(x,completed_all, label = 'Completed All')
 plt.xticks(x, x_labels)
 legend = plt.legend(loc='upper left', shadow=True)
@@ -129,3 +129,14 @@ plt.legend(loc='best', shadow=True)
 plt.plot(logs.groupby(logs.timecreated.dt.date).size())
 
 standard_log.png
+
+
+
+
+FF.make_action_count_feature("loggedin", "n_logins", start_date="2016-08-07", end_date=cutoff)
+
+
+usr_wk1 = logs[(logs.courseid == 10464) &
+                (logs.action == "loggedin") &
+                (logs.timecreated > "2016-08-07") &
+                (logs.timecreated <= "2016-08-14")].username.unique()

@@ -6,7 +6,7 @@ from sklearn.feature_selection import SelectPercentile, f_classif, chi2
 
 from sklearn.model_selection import train_test_split, StratifiedShuffleSplit, cross_val_predict
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import classification_report, roc_curve, auc
+from sklearn.metrics import classification_report, roc_curve, auc, accuracy_score
 from sklearn.dummy import DummyClassifier
 
 from sklearn.linear_model import LogisticRegression, LogisticRegressionCV, SGDClassifier
@@ -89,7 +89,7 @@ class ModelFactory(object):
                      }
 
 
-        clf = GridSearchCV(LogisticRegression(), param_grid, scoring='roc_auc',cv=5)
+        clf = GridSearchCV(LogisticRegression(), param_grid, scoring='recall',cv=5)
         clf.fit(X_train,y_train)
         # best params
         print clf.best_params_
@@ -98,6 +98,7 @@ class ModelFactory(object):
         y_predict = clf.best_estimator_.predict(X_test)
 
         print classification_report(y_test,y_predict)
+        print accuracy_score(y_test,y_predict)
         self.plot_roc(y_test, clf.best_estimator_.predict_proba(X_test), "LR")
         return clf.best_estimator_
 
