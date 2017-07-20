@@ -10,8 +10,13 @@ One of the main issues related to online learning, particularly in MOOCs (massiv
 ## Dataset
 The source of this data is the August 2016 session of the “Teaching with Moodle” MOOC, hosted at https://learn.moodle.net/ . Sessions of this course are delivered twice per year by employees of Moodle PTY LTD. This session was delivered in a fully online format from August 7 to September 4, 2016. There were 6119 students enrolled in this course, and 2 facilitators. Only data from students agreeing to allow their data to be used in research was included in this data set (2167 student).
 
+## Main presentation
+https://github.com/KDmytro/moodle/blob/master/reports/Moodle%20-%20Galvanize%20Capstone%20-%20Final%20preso.pdf
+
 ## Clickstream Data analysis
 ![User Activity](/reports/figures/user_activity.png)
+Initial cli analysis revealed an expected pattern of declining number of active users, though not as rapid as some other more popular MOOC courses. This can partially be explained by the type of learners in the course - instructors and Moodle platform administrators.  For many of these students
+
 
 ## Model
 ![Model Accuracy over Time](/reports/figures/model_score.png)
